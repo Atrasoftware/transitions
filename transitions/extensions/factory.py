@@ -12,6 +12,7 @@ from ..core import Machine
 from .nesting import HierarchicalMachine, NestedTransition, NestedEvent
 from .locking import LockedMachine, LockedEvent
 from .diagrams import GraphMachine, TransitionGraphSupport
+from .asynchronous import AsyncHierarchicalMachine
 
 
 class MachineFactory(object):
@@ -21,7 +22,7 @@ class MachineFactory(object):
 
     # get one of the predefined classes which fulfill the criteria
     @staticmethod
-    def get_predefined(graph=False, nested=False, locked=False):
+    def get_predefined(graph=False, nested=False, locked=False, async=False):
         """ A function to retrieve machine classes by required functionality.
         Args:
             graph (bool): Whether the returned class should contain graph support.
@@ -30,7 +31,7 @@ class MachineFactory(object):
 
         Returns (class): A machine class with the specified features.
         """
-        return _CLASS_MAP[(graph, nested, locked)]
+        return _CLASS_MAP[(graph, nested, locked, async)]
 
 
 class NestedGraphTransition(TransitionGraphSupport, NestedTransition):
@@ -81,14 +82,15 @@ class LockedHierarchicalGraphMachine(GraphMachine, LockedMachine, HierarchicalMa
     event_cls = LockedNestedEvent
 
 
-# 3d tuple (graph, nested, locked)
+# 3d tuple (graph, nested, locked, async)
 _CLASS_MAP = {
-    (False, False, False): Machine,
-    (False, False, True): LockedMachine,
-    (False, True, False): HierarchicalMachine,
-    (False, True, True): LockedHierarchicalMachine,
-    (True, False, False): GraphMachine,
-    (True, False, True): LockedGraphMachine,
-    (True, True, False): HierarchicalGraphMachine,
-    (True, True, True): LockedHierarchicalGraphMachine
+    (False, False, False, False): Machine,
+    (False, True, False, True): AsyncHierarchicalMachine,
+    (False, False, True, False): LockedMachine,
+    (False, True, False, False): HierarchicalMachine,
+    (False, True, True, False): LockedHierarchicalMachine,
+    (True, False, False, False): GraphMachine,
+    (True, False, True, False): LockedGraphMachine,
+    (True, True, False, False): HierarchicalGraphMachine,
+    (True, True, True, False): LockedHierarchicalGraphMachine
 }

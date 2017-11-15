@@ -10,6 +10,7 @@ and made easier to access with a convenience factory.
 from .diagrams import GraphMachine
 from .nesting import HierarchicalMachine
 from .locking import LockedMachine
+from .asynchronous import AsyncHierarchicalMachine
 
 from .factory import MachineFactory, HierarchicalGraphMachine, LockedHierarchicalGraphMachine
 from .factory import LockedHierarchicalMachine, LockedGraphMachine
