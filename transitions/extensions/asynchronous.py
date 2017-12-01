@@ -83,7 +83,7 @@ class AsyncNestedTransition(NestedTransition):
             logger.debug("Executed callback '%s' before conditions." % func)
 
         for c in self.conditions:
-            if not c.check(event_data):
+            if not (await c.check(event_data)):
                 logger.debug("%sTransition condition failed: %s() does not " +
                              "return %s. Transition halted.", event_data.machine.name, c.func, c.target)
                 return False

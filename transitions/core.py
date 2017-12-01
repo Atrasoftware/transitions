@@ -178,8 +178,14 @@ class Condition(object):
         predicate = getattr(event_data.model, self.func) if isinstance(self.func, string_types) else self.func
 
         if event_data.machine.send_event:
-            return predicate(event_data) == self.target
-        return predicate(*event_data.args, **event_data.kwargs) == self.target
+            statement = predicate(event_data)
+        else:
+            statement = predicate(*event_data.args, **event_data.kwargs)
+
+        return self._condition_check(statement)
+
+    def _condition_check(self, statement):
+        return statement == self.target
 
     def __repr__(self):
         return "<%s(%s)@%s>" % (type(self).__name__, self.func, id(self))
@@ -202,6 +208,7 @@ class Transition(object):
 
     # A list of dynamic methods which can be resolved by a ``Machine`` instance for convenience functions.
     dynamic_methods = ['before', 'after', 'prepare']
+    condition_cls = Condition
 
     def __init__(self, source, dest, conditions=None, unless=None, before=None,
                  after=None, prepare=None):
@@ -230,10 +237,10 @@ class Transition(object):
         self.conditions = []
         if conditions is not None:
             for cond in listify(conditions):
-                self.conditions.append(Condition(cond))
+                self.conditions.append(self.condition_cls(cond))
         if unless is not None:
             for cond in listify(unless):
-                self.conditions.append(Condition(cond, target=False))
+                self.conditions.append(self.condition_cls(cond, target=False))
 
     def execute(self, event_data):
         """ Execute the transition.
