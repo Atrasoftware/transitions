@@ -84,7 +84,7 @@ class AsyncNestedTransition(NestedTransition):
 
         for c in self.conditions:
             if not (await c.check(event_data)):
-                logger.debug("%sTransition condition failed: %s() does not " +
+                logger.warning("%sTransition condition failed: %s() does not " +
                              "return %s. Transition halted.", event_data.machine.name, c.func, c.target)
                 return False
         for func in itertools.chain(machine.before_state_change, self.before):
