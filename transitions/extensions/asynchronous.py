@@ -108,6 +108,8 @@ class AsyncNestedTransition(NestedTransition):
         event_data.machine.set_state(self.dest, model)
         event_data.update(model)
         await dest_state.enter_nested(event_data, lvl)
+        machine.state_change.set()
+        machine.state_change.clear()
 
 
 class AsyncNestedEvent(NestedEvent):
@@ -165,6 +167,11 @@ class AsyncHierarchicalMachine(HierarchicalMachine):
     transition_cls = AsyncNestedTransition
     event_cls = AsyncNestedEvent
 
+    def __init__(self, *args, **kwargs):
+        self.state_change = asyncio.Event()
+        self.state_change.clear()
+        super().__init__(*args, **kwargs)
+
     async def _callback(self, func, event_data):
         if isinstance(func, string_types):
             func = getattr(event_data.model, func)
@@ -176,6 +183,10 @@ class AsyncHierarchicalMachine(HierarchicalMachine):
 
         if asyncio.iscoroutine(callback):
             await callback
+
+    async def wait_state(self, state):
+        while self.state != state:
+            await self.state_change.wait()
 
     async def _process(self, trigger):
         if not self.has_queue:
